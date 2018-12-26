@@ -26,10 +26,10 @@ $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 ########################
 ## Environment params ##
 ########################
-$vcenter = "ds-vcsa-06.cpbu.lab"
+$vcenter = "vc.lab.local
 $username = "administrator@vsphere.local"
-$pass = "VMware1!"
-$ssopass = "VMware1!"
+$pass = "P@ssw0rd1!"
+$ssopass = "P@ssw0rd1!"
 
 ################
 ## End params ##
