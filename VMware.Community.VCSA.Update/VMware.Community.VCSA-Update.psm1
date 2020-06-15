@@ -224,8 +224,8 @@ Function Get-VCSAUpdate {
 	else {
 		$SourceType = "LOCAL_AND_ONLINE"
 	}
-	$servers = $Global:DefaultCisServers
 	try {
+		$servers = $Global:DefaultCisServers
 		foreach ($server in $servers) {
 			try {
 				$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
@@ -263,7 +263,7 @@ Function Get-VCSAUpdate {
 		}
 	}
 	catch {
-		Write-Warning "You have encountered an error, please validate server."
+		Write-Warning "Please connect to a server."
 	}
 }
 Function Get-VCSAUpdateDetail {
