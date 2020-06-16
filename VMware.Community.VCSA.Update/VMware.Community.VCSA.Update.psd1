@@ -104,7 +104,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/dstamen/Powershell/tree/master/VMware.Community.VCSA.Update'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://davidstamen.com/featured/vsphere.png'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
