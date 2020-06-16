@@ -15,22 +15,27 @@ Function Get-VCSAUpdatePolicy {
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
 			Get-VCSAUpdatePolicy
 	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.policy' -Server $server.Name
-		$results = $systemUpdateAPI.get()
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.policy' -Server $server.Name
+			$results = $systemUpdateAPI.get()
 
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Default URL" = $results.default_url;
-			"Custom URL" = $results.custom_url;
-			"Auto Stage" = $results.auto_stage;
-			"Auto Update" = $results.auto_update;
-			"Check Schedule" = $results.check_schedule
-			#"Check Schedule" = "Day=" + $results.check_schedule.day + " Hour=" + $results.check_schedule.hour +  " Minute=" + $results.check_schedule.minute
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Default URL" = $results.default_url;
+				"Custom URL" = $results.custom_url;
+				"Auto Stage" = $results.auto_stage;
+				"Auto Update" = $results.auto_update;
+				"Check Schedule" = $results.check_schedule
+				#"Check Schedule" = "Day=" + $results.check_schedule.day + " Hour=" + $results.check_schedule.hour +  " Minute=" + $results.check_schedule.minute
+			}
+			$summaryResult
+
 		}
-		$summaryResult
-
 	}
 }
 Function Set-VCSAUpdatePolicy {
@@ -80,81 +85,86 @@ Function Set-VCSAUpdatePolicy {
 		[parameter(Mandatory=$false)]
 		[string] $CheckSchedule
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.policy' -Server $server.Name
-		$results = $systemUpdateAPI.get()
-		$policy = $systemUpdateAPI.help.set.policy.Create()
-		$policy.custom_url = $results.custom_url
-		$policy.username = $results.username
-		$policy.password = $results.password
-		$policy.check_schedule = $results.check_schedule
-		$policy.auto_stage = $results.auto_stage
-		if ($AutoStage) {
-			$policy.auto_stage = $AutoStage
-			Write-Host "Updating VCSA Update Policy Autostage to $AutoStage"
-		}
-		if ($CustomURL) {
-			if ($CustomURL -like "Clear") {
-				$policy.custom_url = $null
-				Write-Host "Updating VCSA Update Policy Custom URL to Cleared"
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.policy' -Server $server.Name
+			$results = $systemUpdateAPI.get()
+			$policy = $systemUpdateAPI.help.set.policy.Create()
+			$policy.custom_url = $results.custom_url
+			$policy.username = $results.username
+			$policy.password = $results.password
+			$policy.check_schedule = $results.check_schedule
+			$policy.auto_stage = $results.auto_stage
+			if ($AutoStage) {
+				$policy.auto_stage = $AutoStage
+				Write-Host "Updating VCSA Update Policy Autostage to $AutoStage"
+			}
+			if ($CustomURL) {
+				if ($CustomURL -like "Clear") {
+					$policy.custom_url = $null
+					Write-Host "Updating VCSA Update Policy Custom URL to Cleared"
 
+				}
+				else {
+					$policy.custom_url = $CustomURL
+					Write-Host "Updating VCSA Update Policy Custom URL to $CustomURL"
+				}
 			}
-			else {
-				$policy.custom_url = $CustomURL
-				Write-Host "Updating VCSA Update Policy Custom URL to $CustomURL"
+			if ($UsernameURL) {
+				$policy.username = $UsernameURL
+				Write-Host "Updating VCSA Update Policy Username to $UsernameURL"
 			}
-		}
-		if ($UsernameURL) {
-			$policy.username = $UsernameURL
-			Write-Host "Updating VCSA Update Policy Username to $UsernameURL"
-		}
-		if ($PasswordURL) {
-			[VMware.VimAutomation.Cis.Core.Types.V1.Secret]$policy.password = $PasswordURL
-			Write-Host "Updating VCSA Update Policy Password to $PasswordURL"
-		}
-		if ($CheckSchedule) {
-			if ($CheckSchedule -like "Daily") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="EVERYDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+			if ($PasswordURL) {
+				[VMware.VimAutomation.Cis.Core.Types.V1.Secret]$policy.password = $PasswordURL
+				Write-Host "Updating VCSA Update Policy Password to $PasswordURL"
 			}
-			elseif ($CheckSchedule -like "WeeklyMonday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="MONDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+			if ($CheckSchedule) {
+				if ($CheckSchedule -like "Daily") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="EVERYDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklyMonday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="MONDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklyTuesday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="TUESDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklyWednesday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="WEDNESDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklyThursday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="THURSDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklyFriday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="FRIDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklySaturday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="SATURDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
+				elseif ($CheckSchedule -like "WeeklySunday") {
+					$policy.check_schedule[0] = @{hour=0;minute=0;day="SUNDAY"}
+					Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+				}
 			}
-			elseif ($CheckSchedule -like "WeeklyTuesday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="TUESDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
+			$results = $systemUpdateAPI.set($policy)
+			$results
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Status" = "Policy Updated"
 			}
-			elseif ($CheckSchedule -like "WeeklyWednesday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="WEDNESDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
-			}
-			elseif ($CheckSchedule -like "WeeklyThursday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="THURSDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
-			}
-			elseif ($CheckSchedule -like "WeeklyFriday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="FRIDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
-			}
-			elseif ($CheckSchedule -like "WeeklySaturday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="SATURDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
-			}
-			elseif ($CheckSchedule -like "WeeklySunday") {
-				$policy.check_schedule[0] = @{hour=0;minute=0;day="SUNDAY"}
-				Write-Host "Updating VCSA Update Policy Custom URL to $CheckSchedule"
-			}
-		}
-		$results = $systemUpdateAPI.set($policy)
-		$results
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Status" = "Policy Updated"
-		}
-		$summaryResult
+			$summaryResult
 
+		}
 	}
 }
 Function Get-VCSAUpdateStatus {
@@ -174,21 +184,26 @@ Function Get-VCSAUpdateStatus {
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
 			Get-VCSAUpdateStatus
 	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update' -Server $server.Name
-		$results = $systemUpdateAPI.get()
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"State" = $results.state;
-			"Version" = $results.version;
-			"Last Check" = $results.latest_query_time;
-			"Stage Task" = $results.task.subtasks.stage;
-			"Install Task" = $results.task.subtasks.install;
-			"Progress" = $results.task.progress;
-			"Operation" = $results.task.operation
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update' -Server $server.Name
+			$results = $systemUpdateAPI.get()
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"State" = $results.state;
+				"Version" = $results.version;
+				"Last Check" = $results.latest_query_time;
+				"Stage Task" = $results.task.subtasks.stage;
+				"Install Task" = $results.task.subtasks.install;
+				"Progress" = $results.task.progress;
+				"Operation" = $results.task.operation
+			}
+			$summaryResult
 		}
-		$summaryResult
 	}
 }
 Function Get-VCSAUpdate {
@@ -225,7 +240,7 @@ Function Get-VCSAUpdate {
 		$SourceType = "LOCAL_AND_ONLINE"
 	}
 	if ($Global:DefaultCisServers -eq $null) {
-		Write-Warning "Please connect to your vCenter Server using Connect-CisServer"
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
 	}
 	else {
 		$servers = $Global:DefaultCisServers
@@ -287,24 +302,29 @@ Function Get-VCSAUpdateDetail {
 		[parameter(Mandatory=$true)]
 		[String] $Version
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$result = $systemUpdateAPI.get($Version)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Release Date" = $result.release_date;
-			"Contents" = $result.contents;
-			"Update Type" = $result.update_type;
-			"Severity" = $result.severity;
-			"Priority" = $result.priority;
-			"SizeGB" = [math]::Round(([int]$result.size / 1024),2)
-			"Reboot Required" = $result.reboot_required;
-			"Staged" = $result.staged;
-			"Description" = $result.description.args;
-			"Services Affected" = $result.services_will_be_stopped.service
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$result = $systemUpdateAPI.get($Version)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Release Date" = $result.release_date;
+				"Contents" = $result.contents;
+				"Update Type" = $result.update_type;
+				"Severity" = $result.severity;
+				"Priority" = $result.priority;
+				"SizeGB" = [math]::Round(([int]$result.size / 1024),2)
+				"Reboot Required" = $result.reboot_required;
+				"Staged" = $result.staged;
+				"Description" = $result.description.args;
+				"Services Affected" = $result.services_will_be_stopped.service
+			}
+			$summaryResult
 		}
-		$summaryResult
 	}
 }
 Function Get-VCSAUpdateStaged {
@@ -324,37 +344,42 @@ Function Get-VCSAUpdateStaged {
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
 			Get-VCSAUpdateStaged
 	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		try {
-			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.staged' -Server $server.Name
-			$result = $systemUpdateAPI.get()
-			$summaryResult = [pscustomobject] @{
-				"Server" = $server.Name;
-				"Version" = $result.version;
-				"Staging Complete" = $result.staging_complete;
-				"Update Type" = $result.update_type;
-				"Severity" = $result.severity;
-				"Priority" = $result.priority;
-				"SizeGB" = [math]::Round(([int]$result.size / 1024 / 1024 / 1024),2)
-				"Reboot Required" = $result.reboot_required;
-				"Description" = $result.description.args;
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			try {
+				$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.staged' -Server $server.Name
+				$result = $systemUpdateAPI.get()
+				$summaryResult = [pscustomobject] @{
+					"Server" = $server.Name;
+					"Version" = $result.version;
+					"Staging Complete" = $result.staging_complete;
+					"Update Type" = $result.update_type;
+					"Severity" = $result.severity;
+					"Priority" = $result.priority;
+					"SizeGB" = [math]::Round(([int]$result.size / 1024 / 1024 / 1024),2)
+					"Reboot Required" = $result.reboot_required;
+					"Description" = $result.description.args;
+				}
+				$summaryResult
 			}
-			$summaryResult
-		}
-		catch {
-			$e=$_
-			if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
-				Write-Warning "Nothing is Staged"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
-				Write-Warning "Session is not authenticated"
-			}
-		elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
-				Write-Warning "Session is not authorized to perform this operation"
-			}
-			else {
-				Write-Warning "You have encountered an error, please validate server."
+			catch {
+				$e=$_
+				if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
+					Write-Warning "Nothing is Staged"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
+					Write-Warning "Session is not authenticated"
+				}
+			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
+					Write-Warning "Session is not authorized to perform this operation"
+				}
+				else {
+					Write-Warning "You have encountered an error, please validate server."
+				}
 			}
 		}
 	}
@@ -380,15 +405,20 @@ Function Copy-VCSAUpdate {
 		[parameter(Mandatory=$true)]
 		[String] $Version
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$results = $systemUpdateAPI.stage($Version)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Status" = "Update is being Staged, Run Get-VCSAUpdateStaged or Get-VCSAUpdateStatus for current status."
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$results = $systemUpdateAPI.stage($Version)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Status" = "Update is being Staged, Run Get-VCSAUpdateStaged or Get-VCSAUpdateStatus for current status."
+			}
+			$summaryResult
 		}
-		$summaryResult
 	}
 }
 Function Remove-VCSAUpdate {
@@ -408,31 +438,36 @@ Function Remove-VCSAUpdate {
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
 			Remove-VCSAUpdate
 	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		try {
-			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.staged' -Server $server.Name
-			$result = $systemUpdateAPI.delete()
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			try {
+				$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.staged' -Server $server.Name
+				$result = $systemUpdateAPI.delete()
 
-			$summaryResult = [pscustomobject] @{
-				"Server" = $server.Name;
-				"Status" = "Staged update has been deleted"
-			}
-			$summaryResult
-		} 
-		catch {
-			$e=$_
-			if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
-				Write-Warning "Nothing is Staged"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
-				Write-Warning "Session is not authenticated"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
-				Write-Warning "Session is not authorized to perform this operation"
-			}
-			else {
-				Write-Warning "You have encountered an error, please validate server."
+				$summaryResult = [pscustomobject] @{
+					"Server" = $server.Name;
+					"Status" = "Staged update has been deleted"
+				}
+				$summaryResult
+			} 
+			catch {
+				$e=$_
+				if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
+					Write-Warning "Nothing is Staged"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
+					Write-Warning "Session is not authenticated"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
+					Write-Warning "Session is not authorized to perform this operation"
+				}
+				else {
+					Write-Warning "You have encountered an error, please validate server."
+				}
 			}
 		}
 	}
@@ -458,22 +493,27 @@ Function Start-VCSAUpdatePrecheck {
 		[parameter(Mandatory=$true)]
 		[String] $Version
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$result = $systemUpdateAPI.precheck($Version)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Check Time" = $result.check_time;
-			"Reboot Required" = $result.reboot_required;
-			"Estimated Time to Install" = $result.estimated_time_to_install;
-			"Estimated Time to Rollback" = $result.estimated_time_to_rollback;
-			"Questions" = $result.questions;
-			"Precheck Errors" = $result.issues.errors;
-			"Precheck Warnings" = $result.issues.warnings;
-			"Precheck Info" = $result.issues.info;
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$result = $systemUpdateAPI.precheck($Version)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Check Time" = $result.check_time;
+				"Reboot Required" = $result.reboot_required;
+				"Estimated Time to Install" = $result.estimated_time_to_install;
+				"Estimated Time to Rollback" = $result.estimated_time_to_rollback;
+				"Questions" = $result.questions;
+				"Precheck Errors" = $result.issues.errors;
+				"Precheck Warnings" = $result.issues.warnings;
+				"Precheck Info" = $result.issues.info;
+			}
+			$summaryResult
 		}
-		$summaryResult
 	}
 }
 Function Start-VCSAUpdateValidate {
@@ -499,19 +539,24 @@ Function Start-VCSAUpdateValidate {
 		[parameter(Mandatory=$true)]
 		[String] $SSODomainPass
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$UserData = $systemUpdateAPI.help.validate.user_data.Create()
-		$UserData.add("vmdir.password",$SSODomainPass)
-		$result = $systemUpdateAPI.validate($Version,$UserData)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Info" = $result.info
-			"Warnings" = $result.warnings
-			"Errors" = $result.errors
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$UserData = $systemUpdateAPI.help.validate.user_data.Create()
+			$UserData.add("vmdir.password",$SSODomainPass)
+			$result = $systemUpdateAPI.validate($Version,$UserData)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Info" = $result.info
+				"Warnings" = $result.warnings
+				"Errors" = $result.errors
+			}
+			$summaryResult
 		}
-		$summaryResult
 	}
 }
 Function Start-VCSAUpdateInstall {
@@ -537,18 +582,23 @@ Function Start-VCSAUpdateInstall {
 		[parameter(Mandatory=$true)]
 		[String] $SSODomainPass
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$UserData = $systemUpdateAPI.help.install.user_data.Create()
-		$UserData.add("vmdir.password",$SSODomainPass)
-		$result = $systemUpdateAPI.install($Version,$UserData)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Status" = "Update Install has started. Run Get-VCSAUpdateStatus for the latest status."
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$UserData = $systemUpdateAPI.help.install.user_data.Create()
+			$UserData.add("vmdir.password",$SSODomainPass)
+			$result = $systemUpdateAPI.install($Version,$UserData)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Status" = "Update Install has started. Run Get-VCSAUpdateStatus for the latest status."
+			}
+			$summaryResult
+			Write-Warning "During the update process your session will be disconnected. Please reconnect to your server after a few minutes."
 		}
-		$summaryResult
-		Write-Warning "During the update process your session will be disconnected. Please reconnect to your server after a few minutes."
 	}
 }
 Function Start-VCSAUpdateStageandInstall {
@@ -574,18 +624,23 @@ Function Start-VCSAUpdateStageandInstall {
 		[parameter(Mandatory=$true)]
 		[String] $SSODomainPass
 	)
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-		$UserData = $systemUpdateAPI.help.stage_and_install.user_data.Create()
-		$UserData.add("vmdir.password",$SSODomainPass)
-		$result = $systemUpdateAPI.stage_and_install($Version,$UserData)
-		$summaryResult = [pscustomobject] @{
-			"Server" = $server.Name;
-			"Status" = "Update Install has started. Run Get-VCSAUpdateStatus for the latest status."
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+			$UserData = $systemUpdateAPI.help.stage_and_install.user_data.Create()
+			$UserData.add("vmdir.password",$SSODomainPass)
+			$result = $systemUpdateAPI.stage_and_install($Version,$UserData)
+			$summaryResult = [pscustomobject] @{
+				"Server" = $server.Name;
+				"Status" = "Update Install has started. Run Get-VCSAUpdateStatus for the latest status."
+			}
+			$summaryResult
+			Write-Warning "During the update process your session will be disconnected. Please reconnect to your server after a few minutes."
 		}
-		$summaryResult
-		Write-Warning "During the update process your session will be disconnected. Please reconnect to your server after a few minutes."
 	}
 }
 Function Stop-VCSAUpdate {
@@ -605,31 +660,36 @@ Function Stop-VCSAUpdate {
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
 			Stop-VCSAUpdate
 	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		try {
-			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update' -Server $server.Name
-			$results = $systemUpdateAPI.cancel()
-			echo $results
-			$summaryResult = [pscustomobject] @{
-				"Server" = $server.Name;
-				"Status" = "Task has been cancelled"
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "You are not connected to any servers: Use Connect-CisServer to connect to your VCSA"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			try {
+				$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update' -Server $server.Name
+				$results = $systemUpdateAPI.cancel()
+				echo $results
+				$summaryResult = [pscustomobject] @{
+					"Server" = $server.Name;
+					"Status" = "Task has been cancelled"
+				}
+				$summaryResult
 			}
-			$summaryResult
-		}
-		catch {
-			$e=$_
-			if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
-				Write-Warning "Current task is not cancelable"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
-				Write-Warning "Session is not authenticated"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
-				Write-Warning "Session is not authorized to perform this operation"
-			}
-			else {
-				Write-Warning "You have encountered an error, please validate server."
+			catch {
+				$e=$_
+				if ($e.Exception -like "*com.vmware.vapi.std.errors.not_allowed_in_current_state*") {
+					Write-Warning "Current task is not cancelable"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
+					Write-Warning "Session is not authenticated"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
+					Write-Warning "Session is not authorized to perform this operation"
+				}
+				else {
+					Write-Warning "You have encountered an error, please validate server."
+				}
 			}
 		}
 	}
