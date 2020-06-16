@@ -224,39 +224,44 @@ Function Get-VCSAUpdate {
 	else {
 		$SourceType = "LOCAL_AND_ONLINE"
 	}
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		try {
-			$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
-			$results = $systemUpdateAPI.list($SourceType)
-			ForEach($result in $results) {
-				$summaryResult = [pscustomobject] @{
-					"Server" = $server.Name;
-					"Release Date" = $result.release_date;
-					"Version" = $result.version;
-					"Update Type" = $result.update_type;
-					"Severity" = $result.severity;
-					"Priority" = $result.priority;
-					"SizeGB" = [math]::Round(([int]$result.size / 1024),2)
-					"Reboot Required" = $result.reboot_required;
-					"Description" = $result.description.args
+	if ($Global:DefaultCisServers -eq $null) {
+		Write-Warning "Please connect to your vCenter Server using Connect-CisServer"
+	}
+	else {
+		$servers = $Global:DefaultCisServers
+		foreach ($server in $servers) {
+			try {
+				$systemUpdateAPI = Get-CisService -Name 'com.vmware.appliance.update.pending' -Server $server.Name
+				$results = $systemUpdateAPI.list($SourceType)
+				ForEach($result in $results) {
+					$summaryResult = [pscustomobject] @{
+						"Server" = $server.Name;
+						"Release Date" = $result.release_date;
+						"Version" = $result.version;
+						"Update Type" = $result.update_type;
+						"Severity" = $result.severity;
+						"Priority" = $result.priority;
+						"SizeGB" = [math]::Round(([int]$result.size / 1024),2)
+						"Reboot Required" = $result.reboot_required;
+						"Description" = $result.description.args
+					}
+					$summaryResult
 				}
-				$summaryResult
 			}
-		}
-		catch {
-			$e=$_
-			if ($e.Exception -like "*com.vmware.vapi.std.errors.not_found*") {
-				Write-Warning "No applicable update found"
-			}
-			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
-				Write-Warning "Session is not authenticated"
-			}
-		elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
-				Write-Warning "Session is not authorized to perform this operation"
-			}
-			else {
-				Write-Warning "You have encountered an error, please validate server."
+			catch {
+				$e=$_
+				if ($e.Exception -like "*com.vmware.vapi.std.errors.not_found*") {
+					Write-Warning "No applicable update found"
+				}
+				elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthenticated *") {
+					Write-Warning "Session is not authenticated"
+				}
+			elseif ($e.Exception -like "*com.vmware.vapi.std.errors.unauthorized*") {
+					Write-Warning "Session is not authorized to perform this operation"
+				}
+				else {
+					Write-Warning "You have encountered an error, please validate server."
+				}
 			}
 		}
 	}
