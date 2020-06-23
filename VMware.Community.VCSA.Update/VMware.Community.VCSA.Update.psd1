@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -51,7 +51,7 @@ Description = 'Module for Patching VCSA'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @('VMware.PowerCLI')
+RequiredModules = @('VMware.VimAutomation.Cis.Core')
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()

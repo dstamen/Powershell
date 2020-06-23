@@ -2,10 +2,10 @@ Function Get-VCSAUpdatePolicy {
 	<#
 		.NOTES
 		===========================================================================
-		 Created by:    David Stamen
-		 Organization:  VMware
-		 Blog:          www.davidstamen.com
-		 Twitter:       @davidstamen
+		Created by:    David Stamen
+		Organization:  VMware
+		Blog:          www.davidstamen.com
+		Twitter:       @davidstamen
 		===========================================================================
 		.SYNOPSIS
 			This function checks for information about the VCSA Update Policy.
@@ -31,7 +31,6 @@ Function Get-VCSAUpdatePolicy {
 				"Auto Stage" = $results.auto_stage;
 				"Auto Update" = $results.auto_update;
 				"Check Schedule" = $results.check_schedule
-				#"Check Schedule" = "Day=" + $results.check_schedule.day + " Hour=" + $results.check_schedule.hour +  " Minute=" + $results.check_schedule.minute
 			}
 			$summaryResult
 
