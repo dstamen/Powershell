@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.1'
+ModuleVersion = '1.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -24,13 +24,13 @@ GUID = 'bcdb59b0-3b48-4854-ba71-5d7f58816e66'
 Author = 'David Stamen'
 
 # Company or vendor of this module
-CompanyName = 'Unknown'
+CompanyName = 'David Stamen'
 
 # Copyright statement for this module
 Copyright = '(c) David Stamen. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Module for Patching VCSA'
+Description = 'Module for Patching the VMware vCenter Server Appliance'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -69,7 +69,7 @@ RequiredModules = @('VMware.VimAutomation.Cis.Core')
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @('Copy-VCSAUpdate','Get-VCSAUpdate','Get-VCSAUpdateDetail','Get-VCSAUpdatePolicy','Set-VCSAUpdatePolicy','Get-VCSAUpdateStaged','Get-VCSAUpdateStatus','Remove-VCSAUpdate','Start-VCSAUpdateInstall','Start-VCSAUpdatePrecheck','Start-VCSAUpdateStageandInstall','Start-VCSAUpdateValidate','Stop-VCSAUpdate','Copy-VCSAUpdate')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('VMware')
 
         # A URL to the license for this module.
         # LicenseUri = ''
