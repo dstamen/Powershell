@@ -18,7 +18,7 @@ ModuleVersion = '1.0'
 # CompatiblePSEditions = @()
 
 # ID used to uniquely identify this module
-GUID = '5df1a77d-4483-418c-8b9f-756ce2440951'
+GUID = '9955788a-0f40-4528-a1d4-6134406caab3'
 
 # Author of this module
 Author = 'David Stamen'
@@ -106,10 +106,10 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/dstamen/Powershell/tree/master/VMware.Community.WorkloadManagement'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://github.com/dstamen/Powershell/raw/master/VMware.Community.WorkloadManagement/vsphere.png'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
