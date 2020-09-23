@@ -1,36 +1,3 @@
-Function Get-WorkloadManagementNamespace {
-	<#
-		.NOTES
-		===========================================================================
-        Created by:    David Stamen
-        Blog:          www.davidstamen.com
-        Twitter:       @davidstamen
-		===========================================================================
-		.SYNOPSIS
-			This function gets vSphere with Kubernetes Namespaces.
-		.DESCRIPTION
-			Function to return details about the Namespaces
-		.EXAMPLE
-			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sNamespace
-	#>
-	$servers = $Global:DefaultCisServers
-	foreach ($server in $servers) {
-		$systemUpdateAPI = Get-CisService -Name 'com.vmware.vcenter.namespaces.instances' -Server $server.Name
-		$results = $systemUpdateAPI.list()
-
-		$summaryResult = [pscustomobject] @{
-            "Server" = $server.Name;
-            "Cluster" = $results.cluster;
-			"Namespace" = $results.namespace;
-			"Config Status" = $results.config_status;
-			"CPU Used" = $results.stats.cpu_used;
-			"Memory Used" = $results.stats.memory_used;
-			"Storage Used" = $results.stats.storage_used
-		}
-		$summaryResult
-    }
-}
 Function Get-WorkloadManagementCluster {
 	<#
 		.NOTES
@@ -45,7 +12,7 @@ Function Get-WorkloadManagementCluster {
 			Function to return details about the Supervisor Clusters
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sCluster
+			Get-WorkloadManagementCluster
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
@@ -69,6 +36,39 @@ Function Get-WorkloadManagementCluster {
 		$summaryResult
     }
 }
+Function Get-WorkloadManagementNamespace {
+	<#
+		.NOTES
+		===========================================================================
+        Created by:    David Stamen
+        Blog:          www.davidstamen.com
+        Twitter:       @davidstamen
+		===========================================================================
+		.SYNOPSIS
+			This function gets vSphere with Kubernetes Namespaces.
+		.DESCRIPTION
+			Function to return details about the Namespaces
+		.EXAMPLE
+			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
+			Get-WorkloadManagementNamespace
+	#>
+	$servers = $Global:DefaultCisServers
+	foreach ($server in $servers) {
+		$systemUpdateAPI = Get-CisService -Name 'com.vmware.vcenter.namespaces.instances' -Server $server.Name
+		$results = $systemUpdateAPI.list()
+
+		$summaryResult = [pscustomobject] @{
+            "Server" = $server.Name;
+            "Cluster" = $results.cluster;
+			"Namespace" = $results.namespace;
+			"Config Status" = $results.config_status;
+			"CPU Used" = $results.stats.cpu_used;
+			"Memory Used" = $results.stats.memory_used;
+			"Storage Used" = $results.stats.storage_used
+		}
+		$summaryResult
+    }
+}
 Function Get-WorkloadManagementClusterCompatibility {
 	<#
 		.NOTES
@@ -83,7 +83,7 @@ Function Get-WorkloadManagementClusterCompatibility {
 			Function to return details about the Supervisor Clusters
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sCluster
+			Get-WorkloadManagementClusterCompatibility
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
@@ -113,7 +113,7 @@ Function Get-WorkloadManagementClusterSoftware {
 			Function to return details about the Supervisor Clusters Software 
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sClusterSoftware
+			Get-WorkloadManagementClusterSoftware
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
@@ -147,7 +147,7 @@ Function Get-WorkloadManagementClusterVersions {
 			Function to return details about the Supervisor Clusters Versions
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sClusterVersions
+			Get-WorkloadManagementClusterVersions
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
@@ -181,7 +181,7 @@ Function Get-WorkloadManagementAuthorizedNamespaces {
 			Function to return details about the namespace access.
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sClusterSoftware
+			Get-WorkloadManagementAuthorizedNamespaces
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
@@ -210,7 +210,7 @@ Function Get-WorkloadManagementHostsConfig {
 			Function to return details about the Namespaces
 		.EXAMPLE
 			Connect-CisServer -Server 192.168.1.51 -User administrator@vsphere.local -Password VMware1!
-			Get-vk8sNamespace
+			Get-WorkloadManagementHostsConfig
 	#>
 	$servers = $Global:DefaultCisServers
 	foreach ($server in $servers) {
