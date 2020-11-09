@@ -33,4 +33,8 @@ Set-AWSCredential -AccessKey $AccessKey -SecretAccessKey $SecretAccessKey -Store
 Set-AWSCredential -ProfileName $ProfileName
 
 #Deploy Instance
-New-EC2Instance @EC2InstanceDeploymentParameters
+$InstanceInfo = New-EC2Instance @EC2InstanceDeploymentParameters
+
+Write-Host "Here is your EC2 Instance Deployment Information"
+$InstanceInfo.Instances | Format-Table @{Label="Instance Name"; Expression={$_.Tag.Value}},InstanceId,InstanceType,PrivateIPAddress,Platform
+
