@@ -1,0 +1,10 @@
+<powershell>
+
+if (((Get-WindowsFeature Multipath-io).InstallState) -like "Available") {
+    Set-Service -Name msiscsi -StartupType Automatic
+    Start-Service -Name msiscsi
+    Set-InitiatorPort -NodeAddress (Get-InitiatorPort).NodeAddress -NewNodeAddress "iqn.1991-05.com.ds-powershell"
+    Add-WindowsFeature -Name 'Multipath-IO' -Restart
+}
+</powershell>
+<persist>true</persist>
