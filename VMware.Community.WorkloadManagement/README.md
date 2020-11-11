@@ -16,7 +16,7 @@ This Module allows you to interact with the VCSA API's to manage vSphere with Ta
 
 $Manifest = @{
     Path = "./VMware.Community.WorkloadManagement.psd1"
-    ModuleVersion = "1.0"
+    ModuleVersion = "1.0.1"
     Author = "David Stamen"
     CompanyName = "David Stamen"
     PowerShellVersion = "6.0"
@@ -28,4 +28,5 @@ $Manifest = @{
     FunctionsToExport = 'Get-WorkloadManagementNamespace','Get-WorkloadManagementCluster','Get-WorkloadManagementClusterCompatibility','Get-WorkloadManagementClusterSoftware','Get-WorkloadManagementClusterVersions','Get-WorkloadManagementAuthorizedNamespaces','Get-WorkloadManagementHostsConfig'
 }
 
-New-ModuleManifest @Manifest
+Update-ModuleManifest @Manifest
+
